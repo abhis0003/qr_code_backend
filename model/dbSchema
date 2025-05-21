@@ -1,0 +1,19 @@
+const mongoose = require("mongoose");
+
+const dbSchema = new mongoose.Schema({
+  ID: {
+    type: String,
+    required: true,
+  },
+  OriginalUrl: {
+    type: String,
+    required: true,
+  },
+ 
+  date: {
+    type: String,
+    default: Date.now(),
+  },
+});
+
+module.exports = mongoose.model('QrCode',dbSchema);
