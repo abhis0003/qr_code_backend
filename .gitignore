@@ -1,1 +1,37 @@
-node modules/
+node_module# Node.js
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Logs
+logs/
+*.log
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Environment variables
+.env
+
+# OS
+.DS_Store
+Thumbs.db
+
+# VS Code settings
+.vscode/
+
+# Optional - ignore image or test files (if not needed in repo)
+*.png
+*.jpg
+*.jpeg
+*.webp
+test.png
+logo.png
+
+# Optional - ignore build output
+dist/
+build/
