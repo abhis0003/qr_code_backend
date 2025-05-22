@@ -1,48 +1,66 @@
 const express = require('express');
-const cors = require('cors');
-const QRCode = require('qrcode');
+const { QRCodeStyling } = require('qr-code-styling/lib/qr-code-styling.common.js');
+const nodeCanvas = require('canvas');
+const { JSDOM } = require('jsdom');
 
 const app = express();
-app.use(cors());
+const port = 3000;
+
+// Enable JSON body parsing
 app.use(express.json());
 
-// Helper to validate hex color
-const isHexColor = (value) => /^#[0-9A-F]{6}$/i.test(value);
-
+// POST endpoint to generate QR code
 app.post('/generate', async (req, res) => {
-  const { url, color = {}, width } = req.body;
-
-  if (!url) {
-    return res.status(400).json({ error: 'URL is required' });
-  }
-
-  const defaultColors = {
-    dark: '#000000', // black color
-    light: '#ffffff',  //white color
-  };
-
   try {
-    const qrOptions = {
-      errorCorrectionLevel: 'H',
-      type: 'image/png',
-      color: {
-        dark: isHexColor(color.dark) ? color.dark : defaultColors.dark,
-        light: isHexColor(color.light) ? color.light : defaultColors.light,
+    const {
+      data ,
+      width ,
+      height,
+      image ,
+      dotColor = "#4267b2",
+      backgroundColor = "#e9ebee",
+      dotType = "rounded",
+      margin = 20
+    } = req.body;
+
+    const options = {
+      width,
+      height,
+      data,
+      image,
+      dotsOptions: {
+        color: dotColor,
+        type: dotType,
       },
-      width: parseInt(width) || 300,
-      margin: 2,
+      backgroundOptions: {
+        color: backgroundColor,
+      },
+      imageOptions: {
+        crossOrigin: "anonymous",
+        margin,
+        saveAsBlob: true
+      }
     };
 
-    // Generate QR code as a Data URL (base64)
-    const qrBase64 = await QRCode.toDataURL(url, qrOptions);
+    const qrCodeImage = new QRCodeStyling({
+      jsdom: JSDOM,
+      nodeCanvas,
 
-    res.json({ qr: qrBase64 });
+      ...options
+    });
+
+    const buffer = await qrCodeImage.getRawData("png");
+    const base64Image = `data:image/png;base64,${buffer.toString('base64')}`;
+
+    res.json({ base64: base64Image });
+
   } catch (err) {
-    console.error('QR generation error:', err.message);
-    res.status(500).json({ error: 'QR code generation failed' });
+    console.error(err);
+    res.status(500).json({ error: 'QR generation failed' });
   }
 });
 
-app.listen(5000, () => {
-  console.log('Server running at http://localhost:5000');
+app.listen(port, () => {
+  console.log(`QR code API listening at http://localhost:${port}`);
 });
+
